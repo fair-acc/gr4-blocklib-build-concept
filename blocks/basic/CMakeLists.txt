@@ -19,7 +19,7 @@ create_block_library(grBasic
 )
 
 # optionally:
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION include/gnuradio-4.x/basic FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/gnuradio-4.x/basic FILES_MATCHING PATTERN "*.hpp")
 
 if(ENABLE_TESTING)
     add_subdirectory(test)
