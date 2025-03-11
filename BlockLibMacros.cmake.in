@@ -36,6 +36,8 @@ function(gr_generate_block_instantiations LIB_NAME)
             set(PARSER_SPLIT_OPTION "")
         endif()
 
+        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${HDR})
+
         message(STATUS "Generating code for header: ${ABS_HDR} -> ${GEN_DIR} with PARSER_SPLIT_OPTION=${PARSER_SPLIT_OPTION}")
 
         # BlockLibConfig.cmake sets this when BlockLib is found via find_package
