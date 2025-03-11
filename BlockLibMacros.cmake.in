@@ -24,7 +24,7 @@ function(gr_generate_block_instantiations LIB_NAME)
         get_filename_component(BASENAME "${HDR}" NAME_WE)
 
         # remove any previously generated .cpp files for this header.
-        file(GLOB OLD_FILES "${GEN_DIR}/${BASENAME}*.cpp")
+        file(GLOB OLD_FILES "${GEN_DIR}/*${BASENAME}*.cpp")
         if(OLD_FILES)
             message(STATUS "deleting old generated files ${OLD_FILES}")
             file(REMOVE ${OLD_FILES})
