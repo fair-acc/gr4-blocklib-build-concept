@@ -15,7 +15,7 @@ create_block_library(grMath
 )
 
 # optionally:
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION include/gnuradio-4.x/math FILES_MATCHING PATTERN "*.hpp")
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/" DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/gnuradio-4.x/math FILES_MATCHING PATTERN "*.hpp")
 
 if(ENABLE_TESTING)
     add_subdirectory(test)
