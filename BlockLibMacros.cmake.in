@@ -20,44 +20,51 @@ function(gr_generate_block_instantiations LIB_NAME)
 
     set(GEN_CPP_LIST "")
     foreach(HDR IN LISTS CBL_HEADERS)
-        get_filename_component(ABS_HDR "${HDR}" ABSOLUTE)
-        get_filename_component(BASENAME "${HDR}" NAME_WE)
 
-        # remove any previously generated .cpp files for this header.
-        file(GLOB OLD_FILES "${GEN_DIR}/*${BASENAME}*.cpp")
-        if(OLD_FILES)
-            message(STATUS "deleting old generated files ${OLD_FILES}")
-            file(REMOVE ${OLD_FILES})
-        endif()
+        # Try to only run the generation when the header is newer than the last time
+        file(TIMESTAMP ${HDR} modified "%s")
+        if (NOT DEFINED modified_${HDR} OR ${modified} GREATER modified_${HDR})
+            set(modified_${HDR} ${modified} CACHE STRING "Last generated time" FORCE)
 
-        if(GR_SPLIT_BLOCK_INSTANTIATIONS OR CBL_SPLIT_BLOCK_INSTANTIATIONS)
-            set(PARSER_SPLIT_OPTION "--split")
-        else()
-            set(PARSER_SPLIT_OPTION "")
-        endif()
+            get_filename_component(ABS_HDR "${HDR}" ABSOLUTE)
+            get_filename_component(BASENAME "${HDR}" NAME_WE)
 
-        set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${HDR})
+            # remove any previously generated .cpp files for this header.
+            file(GLOB OLD_FILES "${GEN_DIR}/*${BASENAME}*.cpp")
+            if(OLD_FILES)
+                message(STATUS "deleting old generated files ${OLD_FILES}")
+                file(REMOVE ${OLD_FILES})
+            endif()
 
-        message(STATUS "Generating code for header: ${ABS_HDR} -> ${GEN_DIR} with PARSER_SPLIT_OPTION=${PARSER_SPLIT_OPTION}")
+            if(GR_SPLIT_BLOCK_INSTANTIATIONS OR CBL_SPLIT_BLOCK_INSTANTIATIONS)
+                set(PARSER_SPLIT_OPTION "--split")
+            else()
+                set(PARSER_SPLIT_OPTION "")
+            endif()
 
-        # BlockLibConfig.cmake sets this when BlockLib is found via find_package
-        # However when FetchContent is used that doesn't happen, so fall back to the build path
-        if (NOT PARSER_EXECUTABLE)
-            set(PARSER_EXECUTABLE @PROJECT_BINARY_DIR@/tools_build/parse_registrations)
-        endif()
+            set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${HDR})
 
-        # run the parser tool immediately at configuration time.
-        execute_process(
-                COMMAND ${PARSER_EXECUTABLE} "${ABS_HDR}" "${GEN_DIR}" ${PARSER_SPLIT_OPTION}
-                RESULT_VARIABLE gen_res
-                OUTPUT_VARIABLE gen_out
-                ERROR_VARIABLE gen_err
-                OUTPUT_STRIP_TRAILING_WHITESPACE
-                ERROR_STRIP_TRAILING_WHITESPACE
-        )
-        message(STATUS "Output from parse_registrations for ${ABS_HDR}:\n${gen_out}")
-        if(NOT gen_res EQUAL 0)
-            message(FATAL_ERROR "Error running parse_registrations on ${HDR}: ${gen_err}")
+            message(STATUS "Generating code for header: ${ABS_HDR} -> ${GEN_DIR} with PARSER_SPLIT_OPTION=${PARSER_SPLIT_OPTION}")
+
+            # BlockLibConfig.cmake sets this when BlockLib is found via find_package
+            # However when FetchContent is used that doesn't happen, so fall back to the build path
+            if (NOT PARSER_EXECUTABLE)
+                set(PARSER_EXECUTABLE @PROJECT_BINARY_DIR@/tools_build/parse_registrations)
+            endif()
+
+            # run the parser tool immediately at configuration time.
+            execute_process(
+                    COMMAND ${PARSER_EXECUTABLE} "${ABS_HDR}" "${GEN_DIR}" ${PARSER_SPLIT_OPTION}
+                    RESULT_VARIABLE gen_res
+                    OUTPUT_VARIABLE gen_out
+                    ERROR_VARIABLE gen_err
+                    OUTPUT_STRIP_TRAILING_WHITESPACE
+                    ERROR_STRIP_TRAILING_WHITESPACE
+            )
+            message(STATUS "Output from parse_registrations for ${ABS_HDR}:\n${gen_out}")
+            if(NOT gen_res EQUAL 0)
+                message(FATAL_ERROR "Error running parse_registrations on ${HDR}: ${gen_err}")
+            endif()
         endif()
 
         # Glob for the generated .cpp files.
